@@ -6,4 +6,4 @@ namespace Portfolio_Backend;
 
 public class MyUser : IdentityUser { }
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<IdentityUser>(options);
+    : IdentityDbContext<MyUser>(options);

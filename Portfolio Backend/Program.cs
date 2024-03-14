@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
@@ -7,15 +8,26 @@ using Portfolio_Backend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Angular client auth 
+builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+    .AddIdentityCookies()
+    .ApplicationCookie!.Configure(opt => opt.Events = new CookieAuthenticationEvents()
+    {
+        OnRedirectToLogin = ctx =>
+        {
+            ctx.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        }
+    }); 
+builder.Services.AddAuthorizationBuilder();
+
+
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseInMemoryDatabase("AppDb"));
-builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddControllers();
-builder.Services.AddDbContext<ProjectsContext>(opt =>
-    opt.UseInMemoryDatabase("Projects"));
+builder.Services.AddIdentityCore<MyUser>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddApiEndpoints();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -23,7 +35,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "V1",
-        Title = "Portfolio API",
+        Title = "Portfolio API with angular client",
         Description = "An ASP.NET Core Web API for managing my portfolio Angular website.",
         Contact = new OpenApiContact
         {
@@ -33,7 +45,17 @@ builder.Services.AddSwaggerGen(options =>
     });
 } );
 
+// Custom projects entities
+builder.Services.AddControllers();
+builder.Services.AddDbContext<ProjectsContext>(opt =>
+    opt.UseInMemoryDatabase("Projects"));
+
+
 var app = builder.Build();
+
+app.MapIdentityApi<MyUser>();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())
 {
@@ -43,21 +65,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.MapControllers();
 
-app.MapControllers().RequireAuthorization();
+app.MapPost("/logout", async (
+    SignInManager<MyUser> signInManager,
+    [FromBody]object empty) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Ok();
+}).RequireAuthorization();
 
-app.MapSwagger().RequireAuthorization();
-
-app.MapIdentityApi<IdentityUser>();
-
-app.MapPost("/logout", async (SignInManager<IdentityUser> signInManager,
-        [FromBody] object empty) =>
-    {
-        await signInManager.SignOutAsync();
-        return Results.Ok();
-    })
-    .WithOpenApi()
-    .RequireAuthorization();
+app.MapFallbackToFile("/index.html");
 
 app.Run();
