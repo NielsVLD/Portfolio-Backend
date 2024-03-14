@@ -32,7 +32,6 @@ namespace Portfolio_Backend.Controllers
         }
 
         // PUT: api/Projects/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProjects(long id, ProjectDTO projectDTO)
         {
@@ -63,7 +62,6 @@ namespace Portfolio_Backend.Controllers
         }
 
         // POST: api/Projects
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<ProjectDTO>> PostProjects(ProjectDTO projectDTO)
         {
@@ -101,7 +99,7 @@ namespace Portfolio_Backend.Controllers
             return context.Projects.Any(e => e.Id == id);
         }
         private static ProjectDTO ProjectToDTO(Project project) =>
-            new ProjectDTO
+            new()
             {
                 Id = project.Id,
                 Name = project.Name,

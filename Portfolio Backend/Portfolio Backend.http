@@ -1,6 +1,77 @@
 @Portfolio_Backend_HostAddress = http://localhost:5167
+@email = test@x.z
+@badPassword = password
+@password = P455w0rd!
 
-GET {{Portfolio_Backend_HostAddress}}/weatherforecast/
+###
+
+# Let's register with a bad password
+# Notice the validation details that are returned
+POST {{Portfolio_Backend_HostAddress}}/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{badPassword}}",
+  "confirmPassword": "{{badPassword}}"
+}
+
+###
+
+# Now a valid one
+POST {{Portfolio_Backend_HostAddress}}/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "confirmPassword": "{{password}}"
+}
+
+###
+
+# Let's login with a bad password
+POST {{Portfolio_Backend_HostAddress}}/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{badPassword}}"
+}
+
+###
+
+# And the right one. Be sure to copy and paste the tokens from the response.
+# Notice you get when the current token will expire in the response.
+POST {{Portfolio_Backend_HostAddress}}/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+
+# these come from the previous response
+@accessToken = CfDJ8AVtP5pfUC1BqrFYy7ZDW6XM8Hm2N9epd3pK2a06j31B7zBg3O9_rLQdVklAm69tPOVIbeRFp2eSobIXziDyvXO_pbh_w1XygEW4BYGlQFPAPTl5QrSgE3vTJxTPYuhO_2XbW8XvWY169pw5TBrpA24-otrpm-sOuyCKeEMO77kSJzm7zW6n4EX2miwWyJtlvO9Z7Ymlx10pLQc8PlvkhwDxXypSVRG19RG1ajmVcDx8Xal19BZJ3sVT-k1T0KMxbr0FpwbCevuoxDq8NDLdu80ZIfOvkFZEDU2rHCFjCPPJNGE22RrY5kkvfAEn79zqXdHJOl1gCpapXCQcK2ys2hsRF8G55XuIwyzrJk0fXvHs2Clo9N9IN7qhi5iyjmxCj2sho8p1-hUlQQtSdMmZUOCSOQazvGokkYW8xtEwld7c57VigHAwUS2V47UEJn3aw77IcUdtGNptXvI4t3o9ZsCC74OTUI10zFspcS-44Ae-vnnMkiwiJN8EC2O7XCMcVV9J8aH2d7xpNeBOsTJwLIaUOduvPYU0itD8vb2A_cHt90Ccm4W7HUkoKxiVD_vfS2PhNP4I2q7kwHm2aNFb9-2hPpvcBF7vv_yA_IMRF89fBifBw8ieB4mcCMIiXf3VS37a8jSdZVWgmPHDQdLUzAvFefWf6bGlzFjLNuYYPfQR
+@refreshToken = CfDJ8AVtP5pfUC1BqrFYy7ZDW6UrB07GkdsRAsSYV6vjJimE-PcI3mLrhLXr9sKu_mukNP2owYLlQrlzNCctSjtSIWgVVHKF5NMTUQnHincwPRVPICifCqEQyI9eTnz1sutNbskAtvUSTUces2YuqLLv7fQWYUR0V7ejCrt80ozKY76N0DKP-vP6JRpmVoJXKBVaQJJg5A7kv66Wwau0EBUceE3fgjNDFGVJCo5WIqM4uSnqtNEDPasnb22j6ApRvvS9s4vw2U_bgOaHmp15L5dGAh2F5En6Wi7Aop2dh7xFTc3uy8TJi61dzByuqlcknn4EVsxeHDM9TcCRC5wFuV2f4Ui970iBh6wpNVBHB_94jZvK2a4riI5qNqCgIQz5OPv_eha6d5s7V0r43eCZ7F6NDCHrzBO2MXAWjptL3LPBAm3tCsGtXNTer5b1B6-3UHU_5nGhPskzHOcWpwNNRWh3CCXkj1OlZGt2TKL1affoJGl3PjHpzRMlaPlHYBp5j3Xj_C6xmbG8SpsbXzl_cZsOSdLnfY2DyPfZSQhj0DAtjFbeJu49FIZRSY0zztqSH4_PKAj7wQKJjDFBnNonctUao6dS7vLXBu5CsPOWHJcRmOkOAcmaqK-jOIVNXpx9bGeINfa2hFjtIPzx52gLARJ2E28F4cHAX2Er_1ytdScN9pC4
+
+# Let's try the weather again, this time with a token
+GET {{Portfolio_Backend_HostAddress}}/api/Projects
+Authorization: Bearer {{accessToken}}
 Accept: application/json
 
 ###
+
+# Now assume the session is about to expire and you want to extend the session without forcing the user to login again.
+POST {{Portfolio_Backend_HostAddress}}/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}" 
+}
+
+###
+
+# You should get a new set of credentials, including the refresh token
