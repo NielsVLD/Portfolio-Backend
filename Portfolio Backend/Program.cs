@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
-using Portfolio_Backend;
 using Portfolio_Backend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,14 +18,14 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
             return Task.CompletedTask;
         }
     }); 
+
 builder.Services.AddAuthorizationBuilder();
 
-
-builder.Services.AddDbContext<ApplicationDbContext>(
+builder.Services.AddDbContext<ProjectsContext>(
     options => options.UseInMemoryDatabase("AppDb"));
 
 builder.Services.AddIdentityCore<MyUser>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddEntityFrameworkStores<ProjectsContext>()
     .AddApiEndpoints();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -47,9 +46,6 @@ builder.Services.AddSwaggerGen(options =>
 
 // Custom projects entities
 builder.Services.AddControllers();
-builder.Services.AddDbContext<ProjectsContext>(opt =>
-    opt.UseInMemoryDatabase("Projects"));
-
 
 var app = builder.Build();
 
@@ -65,7 +61,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapControllers();
+app.MapControllers().RequireAuthorization();
 
 app.MapPost("/logout", async (
     SignInManager<MyUser> signInManager,
