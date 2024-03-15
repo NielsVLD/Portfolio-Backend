@@ -1,11 +1,30 @@
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Portfolio_Backend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Token Bucket limiter
+var tokenPolicy = "token";
+var myOptions = new MyRateLimitOptions();
+builder.Configuration.GetSection(MyRateLimitOptions.MyRateLimit).Bind(myOptions);
+
+builder.Services.AddRateLimiter(_ => _
+    .AddTokenBucketLimiter(policyName: tokenPolicy, options =>
+    {
+        options.TokenLimit = myOptions.TokenLimit;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = myOptions.QueueLimit;
+        options.ReplenishmentPeriod = TimeSpan.FromSeconds(myOptions.ReplenishmentPeriod);
+        options.TokensPerPeriod = myOptions.TokensPerPeriod;
+        options.AutoReplenishment = myOptions.AutoReplenishment;
+    }));
+
 
 // Angular client auth 
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
@@ -47,6 +66,7 @@ builder.Services.AddSwaggerGen(options =>
 // Custom projects entities
 builder.Services.AddControllers();
 
+// APP
 var app = builder.Build();
 
 app.MapIdentityApi<MyUser>();
@@ -61,7 +81,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapControllers().RequireAuthorization();
+app.MapControllers();
 
 app.MapPost("/logout", async (
     SignInManager<MyUser> signInManager,
@@ -72,5 +92,9 @@ app.MapPost("/logout", async (
 }).RequireAuthorization();
 
 app.MapFallbackToFile("/index.html");
+
+// Rate limiter
+app.UseRouting();
+app.UseRateLimiter();
 
 app.Run();

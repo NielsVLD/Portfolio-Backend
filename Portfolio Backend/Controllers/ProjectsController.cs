@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Portfolio_Backend.Models;
 
@@ -9,6 +11,7 @@ namespace Portfolio_Backend.Controllers
     public class ProjectsController(ProjectsContext context) : ControllerBase
     {
         // GET: api/Projects
+        [EnableRateLimiting("token")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectDTO>>> GetProjects()
         {
@@ -18,6 +21,8 @@ namespace Portfolio_Backend.Controllers
         }
 
         // GET: api/Projects/5
+        [EnableRateLimiting("token")]
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectDTO>> GetProjects(long id)
         {
@@ -32,6 +37,9 @@ namespace Portfolio_Backend.Controllers
         }
 
         // PUT: api/Projects/5
+        [EnableRateLimiting("token")]
+
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProjects(long id, ProjectDTO projectDTO)
         {
@@ -62,6 +70,9 @@ namespace Portfolio_Backend.Controllers
         }
 
         // POST: api/Projects
+        [EnableRateLimiting("token")]
+
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<ProjectDTO>> PostProjects(ProjectDTO projectDTO)
         {
@@ -79,6 +90,9 @@ namespace Portfolio_Backend.Controllers
         }
 
         // DELETE: api/Projects/5
+        [EnableRateLimiting("token")]
+
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProjects(long id)
         {
