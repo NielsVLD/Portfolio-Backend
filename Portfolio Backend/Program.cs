@@ -94,7 +94,5 @@ app.MapPost("/logout", async (
 app.MapFallbackToFile("/index.html");
 
 // Rate limiter
-app.UseRouting();
-app.UseRateLimiter();
-
+app.UseAuthorization();
 app.Run();

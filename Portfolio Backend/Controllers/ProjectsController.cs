@@ -12,6 +12,7 @@ namespace Portfolio_Backend.Controllers
     {
         // GET: api/Projects
         [EnableRateLimiting("token")]
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectDTO>>> GetProjects()
         {
@@ -22,7 +23,6 @@ namespace Portfolio_Backend.Controllers
 
         // GET: api/Projects/5
         [EnableRateLimiting("token")]
-
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectDTO>> GetProjects(long id)
         {
@@ -38,7 +38,6 @@ namespace Portfolio_Backend.Controllers
 
         // PUT: api/Projects/5
         [EnableRateLimiting("token")]
-
         [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProjects(long id, ProjectDTO projectDTO)
