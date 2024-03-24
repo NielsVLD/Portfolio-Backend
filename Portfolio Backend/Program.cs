@@ -1,21 +1,51 @@
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
-using Portfolio_Backend;
 using Portfolio_Backend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseInMemoryDatabase("AppDb"));
-builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+// Token Bucket limiter
+var tokenPolicy = "token";
+var myOptions = new MyRateLimitOptions();
+builder.Configuration.GetSection(MyRateLimitOptions.MyRateLimit).Bind(myOptions);
 
-builder.Services.AddControllers();
-builder.Services.AddDbContext<ProjectsContext>(opt =>
-    opt.UseInMemoryDatabase("Projects"));
+builder.Services.AddRateLimiter(_ => _
+    .AddTokenBucketLimiter(policyName: tokenPolicy, options =>
+    {
+        options.TokenLimit = myOptions.TokenLimit;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = myOptions.QueueLimit;
+        options.ReplenishmentPeriod = TimeSpan.FromSeconds(myOptions.ReplenishmentPeriod);
+        options.TokensPerPeriod = myOptions.TokensPerPeriod;
+        options.AutoReplenishment = myOptions.AutoReplenishment;
+    }));
+
+
+// Angular client auth 
+builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+    .AddIdentityCookies()
+    .ApplicationCookie!.Configure(opt => opt.Events = new CookieAuthenticationEvents()
+    {
+        OnRedirectToLogin = ctx =>
+        {
+            ctx.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        }
+    }); 
+
+builder.Services.AddAuthorizationBuilder();
+
+builder.Services.AddDbContext<ProjectsContext>(
+    options => options.UseInMemoryDatabase("AppDb"));
+
+builder.Services.AddIdentityCore<MyUser>()
+    .AddEntityFrameworkStores<ProjectsContext>()
+    .AddApiEndpoints();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -23,7 +53,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "V1",
-        Title = "Portfolio API",
+        Title = "Portfolio API with angular client",
         Description = "An ASP.NET Core Web API for managing my portfolio Angular website.",
         Contact = new OpenApiContact
         {
@@ -33,7 +63,15 @@ builder.Services.AddSwaggerGen(options =>
     });
 } );
 
+// Custom projects entities
+builder.Services.AddControllers();
+
+// APP
 var app = builder.Build();
+
+app.MapIdentityApi<MyUser>().RequireRateLimiting(tokenPolicy);
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())
 {
@@ -43,21 +81,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.MapControllers();
 
-app.MapControllers().RequireAuthorization();
+app.MapPost("/logout", async (
+    SignInManager<MyUser> signInManager,
+    [FromBody]object empty) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Ok();
+}).RequireAuthorization();
 
-app.MapSwagger().RequireAuthorization();
+app.MapFallbackToFile("/index.html");
 
-app.MapIdentityApi<IdentityUser>();
-
-app.MapPost("/logout", async (SignInManager<IdentityUser> signInManager,
-        [FromBody] object empty) =>
-    {
-        await signInManager.SignOutAsync();
-        return Results.Ok();
-    })
-    .WithOpenApi()
-    .RequireAuthorization();
+// Rate limiter
+app.UseRateLimiter();
 
 app.Run();
