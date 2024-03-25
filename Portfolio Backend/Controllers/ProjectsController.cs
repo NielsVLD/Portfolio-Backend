@@ -12,7 +12,6 @@ namespace Portfolio_Backend.Controllers
     {
         // GET: api/Projects
         [EnableRateLimiting("token")]
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectDTO>>> GetProjects()
         {
@@ -73,13 +72,15 @@ namespace Portfolio_Backend.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<ProjectDTO>> PostProjects(ProjectDTO projectDTO)
+        public async Task<ActionResult<ProjectDTO>> PostProjects(ProjectDTO projectDto)
         {
             var project = new Project
             {
-                Name = projectDTO.Name,
-                Description = projectDTO.Description,
-                Skills = projectDTO.Skills
+                Name = projectDto.Name,
+                Description = projectDto.Description,
+                DescriptionLong = projectDto.DescriptionLong,
+                Skills = projectDto.Skills,
+                Icons = projectDto.Icons
             };
             
             context.Projects.Add(project);
@@ -117,7 +118,9 @@ namespace Portfolio_Backend.Controllers
                 Id = project.Id,
                 Name = project.Name,
                 Description = project.Description,
-                Skills = project.Skills
+                DescriptionLong = project.DescriptionLong,
+                Skills = project.Skills,
+                Icons = project.Icons
             };
     }
 }

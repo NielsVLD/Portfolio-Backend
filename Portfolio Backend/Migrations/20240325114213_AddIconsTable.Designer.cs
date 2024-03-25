@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Portfolio_Backend.Models;
@@ -11,9 +12,11 @@ using Portfolio_Backend.Models;
 namespace Portfolio_Backend.Migrations
 {
     [DbContext(typeof(ProjectsContext))]
-    partial class ProjectsContextModelSnapshot : ModelSnapshot
+    [Migration("20240325114213_AddIconsTable")]
+    partial class AddIconsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -229,10 +232,6 @@ namespace Portfolio_Backend.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
-
-                    b.Property<string>("DescriptionLong")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
 
                     b.Property<string[]>("Icons")
                         .HasColumnType("text[]");

@@ -9,6 +9,10 @@ public class Project
     public string? Name { get; set; }
     [MaxLength(500)]
     public string? Description { get; set; }
+    [MaxLength(2000)]
+
+    public string? DescriptionLong { get; set; }
     public string[]? Skills { get; set; }
+    public string[]? Icons { get; set; }
     public string? Secret { get; set; }
 }
