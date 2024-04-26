@@ -13,6 +13,6 @@ public class ProjectDTO
     public string? DescriptionLong { get; set; }
 
     public string[]? Skills { get; set; }
-    public string[]? Icons { get; set; }
 
+    public string[]? Icons { get; set; }
 }

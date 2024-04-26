@@ -80,7 +80,7 @@ namespace Portfolio_Backend.Controllers
                 Description = projectDto.Description,
                 DescriptionLong = projectDto.DescriptionLong,
                 Skills = projectDto.Skills,
-                Icons = projectDto.Icons
+                Icons = projectDto.Icons,
             };
             
             context.Projects.Add(project);
@@ -120,7 +120,7 @@ namespace Portfolio_Backend.Controllers
                 Description = project.Description,
                 DescriptionLong = project.DescriptionLong,
                 Skills = project.Skills,
-                Icons = project.Icons
+                Icons = project.Icons,
             };
     }
 }
