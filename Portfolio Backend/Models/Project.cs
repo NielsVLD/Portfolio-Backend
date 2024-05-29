@@ -14,6 +14,7 @@ public class Project
     public string? DescriptionLong { get; set; }
     public string[]? Skills { get; set; }
     public string[]? Icons { get; set; }
+    public string? Link {get; set; }
 
     public string? Secret { get; set; }
 }

@@ -15,4 +15,5 @@ public class ProjectDTO
     public string[]? Skills { get; set; }
 
     public string[]? Icons { get; set; }
+    public string? Link {get; set; }
 }

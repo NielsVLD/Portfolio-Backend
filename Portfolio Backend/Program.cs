@@ -69,7 +69,6 @@ builder.Services.AddControllers();
 
 // APP
 var app = builder.Build();
-
 app.MapIdentityApi<MyUser>().RequireRateLimiting(tokenPolicy);
 app.UseDefaultFiles();
 app.UseStaticFiles();
