@@ -12,7 +12,6 @@ namespace Portfolio_Backend.Controllers
     {
         // GET: api/Projects
         [EnableRateLimiting("token")]
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectDTO>>> GetProjects()
         {
@@ -40,14 +39,26 @@ namespace Portfolio_Backend.Controllers
         [EnableRateLimiting("token")]
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProjects(long id, ProjectDTO projectDTO)
+        public async Task<IActionResult> PutProjects(long id, ProjectDTO projectDto)
         {
-            if (id != projectDTO.Id)
+            if (id != projectDto.Id)
             {
-                return BadRequest();
+                
+                return BadRequest("project dto is: " + projectDto.Id);
             }
 
-            context.Entry(projectDTO).State = EntityState.Modified;
+            var project = new Project
+            {
+                Id = projectDto.Id,
+                Name = projectDto.Name,
+                Description = projectDto.Description,
+                DescriptionLong = projectDto.DescriptionLong,
+                Skills = projectDto.Skills,
+                Icons = projectDto.Icons,
+                Link = projectDto.Link,
+            };
+
+            context.Entry(project).State = EntityState.Modified;
 
             try
             {
@@ -59,10 +70,6 @@ namespace Portfolio_Backend.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
             }
 
             return NoContent();
@@ -70,16 +77,18 @@ namespace Portfolio_Backend.Controllers
 
         // POST: api/Projects
         [EnableRateLimiting("token")]
-
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<ProjectDTO>> PostProjects(ProjectDTO projectDTO)
+        public async Task<ActionResult<ProjectDTO>> PostProjects(ProjectDTO projectDto)
         {
             var project = new Project
             {
-                Name = projectDTO.Name,
-                Description = projectDTO.Description,
-                Skills = projectDTO.Skills
+                Name = projectDto.Name,
+                Description = projectDto.Description,
+                DescriptionLong = projectDto.DescriptionLong,
+                Skills = projectDto.Skills,
+                Icons = projectDto.Icons,
+                Link = projectDto.Link,
             };
             
             context.Projects.Add(project);
@@ -117,7 +126,10 @@ namespace Portfolio_Backend.Controllers
                 Id = project.Id,
                 Name = project.Name,
                 Description = project.Description,
-                Skills = project.Skills
+                DescriptionLong = project.DescriptionLong,
+                Skills = project.Skills,
+                Icons = project.Icons,
+                Link = project.Link,
             };
     }
 }
