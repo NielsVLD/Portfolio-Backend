@@ -40,8 +40,9 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 
 builder.Services.AddAuthorizationBuilder();
 
+// DB
 builder.Services.AddDbContext<ProjectsContext>(
-    options => options.UseInMemoryDatabase("AppDb"));
+    options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebApiDatabase")));
 
 builder.Services.AddIdentityCore<MyUser>()
     .AddEntityFrameworkStores<ProjectsContext>()
@@ -68,7 +69,6 @@ builder.Services.AddControllers();
 
 // APP
 var app = builder.Build();
-
 app.MapIdentityApi<MyUser>().RequireRateLimiting(tokenPolicy);
 app.UseDefaultFiles();
 app.UseStaticFiles();
